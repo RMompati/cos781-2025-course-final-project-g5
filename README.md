@@ -1,7 +1,7 @@
 # COS781-2025 Project: Replicating Association Rules and CF on Sparse Amazon E-Commerce Data
 
 ## Project Overview
-This project replicates the methodology from the assigned paper ["Association Rules and Collaborative Filtering on Sparse Data of a Leading Online Retailer"](https://ieeexplore.ieee.org/document/8269990) using the Amazon Books dataset (sparse user-item ratings as proxy for views/purchases). We address sparsity in recommender systems by testing two models: Apriori-based association rules and memory-based collaborative filtering (user-based UCFA and item-based ICFA). Key insight: Restrict to popular items for better performance, as ~80% revenue comes from them.
+This project replicates the methodology from the assigned paper ["Association Rules and Collaborative Filtering on Sparse Data of a Leading Online Retailer"](https://ieeexplore.ieee.org/document/8290000) using the Amazon Books dataset (sparse user-item ratings as proxy for views/purchases). We address sparsity in recommender systems by testing two models: Apriori-based association rules and memory-based collaborative filtering (user-based UCFA and item-based ICFA). Key insight: Restrict to popular items for better performance, as ~80% revenue comes from them.
 
 **Research Question**: How can traditional recommenders (association rules & CF) handle extreme sparsity (~99%) in e-commerce data, and does focusing on popular items improve accuracy without losing utility?
 

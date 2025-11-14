@@ -8,7 +8,7 @@ This project replicates the methodology from the assigned paper ["Association Ru
 **Why Interesting?**: E-commerce sparsity causes poor recommendations; solutions like popular-item filtering are simple, scalable, and revenue-focused—relevant for African retail (e.g., via Lacuna Fund extensions).
 
 ## Dataset
-- **Source**: Amazon Books subset from https://gist.github.com/entaroadun/1653794 or RUCAIBox/RecSysDatasets (GitHub).
+- **Source**: Amazon Books, Appliances, or All Beauty or Electronics subset from https://gist.github.com/entaroadun/1653794 or RUCAIBox/RecSysDatasets (GitHub).
 - **Size**: ~8M ratings from 200K+ users on 60K+ items (5-core filtered for sparsity).
 - **Attributes**: UserID, ItemID (ASIN), Rating (1-5; map >3 to "views," 5 to "purchases"), Timestamp.
 - **Sparsity**: ~99.9% (calculated as 1 - (interactions / (users * items))).

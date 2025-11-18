@@ -63,7 +63,7 @@ This project replicates the methodology from the assigned paper ["Association Ru
 ## Setup Instructions
 1. Clone repo: `git clone <your-repo>`.
 2. Install: `pip install pandas numpy scikit-surprise mlxtend matplotlib seaborn` (use course env).
-3. Run: `jupyter notebook main.ipynb`.
+3. Run: `jupyter notebook cos781-A3-sub.ipynb`.
 4. Data: Place `amazon_books.csv` in `/data/`.
 
 ## Generative AI Statement

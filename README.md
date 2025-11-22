@@ -59,7 +59,7 @@ This project replicates and extends the methodology from the assigned paper ["As
 | EDA & Preprocessing | 15 Oct 2025 | Notebook w/ visuals; iterative filtering logic | Lead |
 | Implement Models | 31 Oct 2025 | Code Apriori, UCFA, ICFA, **and SVD** | All |
 | Report Draft | 7 Nov 2025 | KDD format; include "Goldilocks" analysis | Lead |
-| Presentation & Files | 21 Nov 2025 | 7 slides; doc code/repo | All |
+| Presentation & Files | 22 Nov 2025 | 7 slides; doc code/repo | All |
 
 ## Setup Instructions
 1. Clone repo: `git clone <your-repo>`.

@@ -1,75 +1,76 @@
 # COS781-2025 Project: Replicating Association Rules and CF on Sparse Amazon E-Commerce Data
 
 ## Project Overview
-This project replicates the methodology from the assigned paper ["Association Rules and Collaborative Filtering on Sparse Data of a Leading Online Retailer"](https://ieeexplore.ieee.org/document/8290000) using the Amazon Books dataset (sparse user-item ratings as proxy for views/purchases). We address sparsity in recommender systems by testing two models: Apriori-based association rules and memory-based collaborative filtering (user-based UCFA and item-based ICFA). Key insight: Restrict to popular items for better performance, as ~80% revenue comes from them.
+This project replicates and extends the methodology from the assigned paper ["Association Rules and Collaborative Filtering on Sparse Data of a Leading Online Retailer"](https://ieeexplore.ieee.org/document/8290000). We utilise the Amazon Appliances dataset to address the challenge of extreme data sparsity in recommender systems. We evaluate three distinct modelling approaches: Apriori-based association rules, memory-based collaborative filtering (UCFA & ICFA), and model-based Matrix Factorization (SVD).
 
-**Research Question**: How can traditional recommenders (association rules & CF) handle extreme sparsity (~99%) in e-commerce data, and does focusing on popular items improve accuracy without losing utility?
+**Research Question**: How do traditional (Association Rules, Neighbor-based CF) and modern (SVD) recommenders handle extreme sparsity (~99%) in e-commerce data? Does restricting data to popular items consistently improve accuracy, or is there a limit to this approach?
 
-**Why Interesting?**: E-commerce sparsity causes poor recommendations; solutions like popular-item filtering are simple, scalable, and revenue-focused—relevant for African retail (e.g., via Lacuna Fund extensions).
+**Key Insight**: While the paper suggests that restricting to popular items improves performance, our extension reveals that filtering improves accuracy only up to a specific point (e.g., the Top 90 items), after which information loss causes performance to degrade.
 
 ## Dataset
-- **Source**: Amazon Books, Appliances, or All Beauty or Electronics subset from https://gist.github.com/entaroadun/1653794 or RUCAIBox/RecSysDatasets (GitHub).
-- **Size**: ~8M ratings from 200K+ users on 60K+ items (5-core filtered for sparsity).
-- **Attributes**: UserID, ItemID (ASIN), Rating (1-5; map >3 to "views," 5 to "purchases"), Timestamp.
-- **Sparsity**: ~99.9% (calculated as 1 - (interactions / (users * items))).
-- **Prep Note**: Download CSV; ensure ready by proposal deadline. Alternative: Fall back to Instacart if needed.
+- **Source**: Amazon Appliances subset from HuggingFace (`McAuley-Lab/Amazon-Reviews-2023`) or standard repositories.
+- **Size**: ~2.1M interactions reduced to a "core" set of ~122K interactions via iterative filtering.
+- **Attributes**: UserID, ParentASIN, Rating (1-5), Timestamp.
+- **Sparsity**: **99.99%** raw; reduced to **~99.95%** after preprocessing.
 
 ## Approach/Methods
 1. **Exploratory Data Analysis (EDA)**:
-   - Compute sparsity metric.
-   - Visualize: Histograms (ratings dist), Degree dist (users/items per interaction), Heatmap (top users/items).
-   - Identify popular items: Top 50 by total ratings (proxy for views/purchases).
+   - Compute sparsity metrics before and after filtering.
+   - Visualize: "Long tail" distributions (users/items), Rating frequency comparison.
+   - Identify popular items vs. niche items to understand information loss.
 
 2. **Data Preprocessing**:
-   - Map ratings to compound index: Rating * p + (if rating==5) * q; p = total_ratings / total_purchases (~300), q=1.
-   - Split: 80/20 train/test.
-   - Handle sparsity: No imputation (preserve); filter to popular items for variant.
+   - **Iterative Filtering**: Recursively filter users (min 3 reviews) and items (min 5 reviews) until dataset stability is reached.
+   - **Split**: Standard cross-validation (k-fold) for robust error estimation.
+   - **Subsets**: Create variants of the dataset containing only the "Top N" items (N=100 down to 30) to test the popularity hypothesis.
 
 3. **Data Mining Methods**:
    - **Model 1: Association Rules (Apriori)**:
-     - Use mlxtend.frequent_patterns.apriori on transaction matrix (user baskets as itemsets).
-     - Thresholds: Min support=0.001, confidence=0.1.
-     - Output: Frequent itemsets (e.g., 20-50 rules); expect few strong rules (80% conf >0.6) due to sparsity.
-   - **Model 2: Collaborative Filtering (Memory-Based)**:
-     - Build user-item matrix with Surprise library.
-     - Similarities: Pearson (paper) + Cosine (our alt).
-     - Neighbors: Best-k (k=20-50; better than threshold for sparsity).
-     - Predictions: UCFA (user neighbors), ICFA (item neighbors).
-     - Variants: Full data vs. popular items only (top 30-50).
-   - **Implementation**: Python notebook (Jupyter); scikit-surprise for CF, mlxtend for Apriori.
+     - Library: `mlxtend`.
+     - Method: Transaction-based mining on user history.
+     - thresholds: Low `min_support` (0.001) to catch rare pairs; `lift` metric to identify complementary bundles (e.g., machine + specific pods).
+   - **Model 2: Memory-Based Collaborative Filtering**:
+     - Library: `scikit-surprise`.
+     - Algorithms: **UCFA** (User-Based) and **ICFA** (Item-Based).
+     - Metrics: Cosine similarity.
+   - **Model 3: Model-Based Collaborative Filtering (SVD)**:
+     - Library: `scikit-surprise`.
+     - Algorithm: Singular Value Decomposition (SVD) using Matrix Factorization.
+     - Purpose: To capture latent factors (hidden features) between users and items, offering a robust alternative to neighbor-based methods in sparse environments.
 
 4. **Evaluation**:
-   - Metrics: MRPE (Mean Relative % Error: avg(|actual-pred|/actual *100)), MAE (Mean Abs Error).
-   - Baselines: Paper's results (MRPE~50% full, <25% popular); random predictor.
-   - Compare: ICFA vs. UCFA (expect ICFA better, faster); full vs. popular (expect 2x error reduction).
-   - Success: Reproduce paper (high error on full, low on popular); our alt (cosine) improves MAE by 5-10%.
+   - **Metrics**: MAE (Mean Absolute Error).
+   - **Comparisons**:
+     - **Algorithm Superiority**: Compare UCFA vs. ICFA vs. SVD on the core baseline.
+     - **Sparsity Hypothesis**: Compare performance trend lines as the dataset is filtered from Top 100 down to Top 30 items.
+   - **Success Criteria**: Reproduce paper's finding (ICFA > UCFA) and demonstrate SVD's superior handling of sparsity (SVD > ICFA).
 
 ## Expected Outputs
-- **By End of Semester**: 
-  - Replicated results: Charts (MRPE/MAE vs. data size/top items), 50+ rules, predictions on test set.
-  - Insights: CF outperforms rules on sparse data; popular filtering as practical fix.
-  - Artifacts: 4-page KDD report, 7-slide deck, GitHub repo with notebook/docs/code.
-- **Risks/Mitigations**: High compute—subsample to 100K records; if sparsity too low, add noise/mask.
+- **By End of Semester**:
+  - **Replicated Results**: Confirmation that ICFA outperforms UCFA.
+  - **New Findings**: SVD achieves the lowest baseline error (MAE ~0.709).
+  - **Visualizations**: The curve showing the trade-off between data density and item diversity.
+  - **Artifacts**: 4-page KDD report, 7-slide deck, GitHub repo with notebook/docs/code.
 
 ## Timeline & Tasks
 | Milestone | Date | Tasks | Owner |
 |-----------|------|--------|-------|
 | Proposal/Abstract | 25 Sep 2025 | Answer 5 questions; submit ClickUp | All |
-| EDA & Preprocessing | 15 Oct 2025 | Notebook w/ visuals; compute sparsity | Lead |
-| Implement Models | 31 Oct 2025 | Code Apriori + CF; run experiments | All |
-| Report Draft | 7 Nov 2025 | KDD format; results tables/charts | Lead |
+| EDA & Preprocessing | 15 Oct 2025 | Notebook w/ visuals; iterative filtering logic | Lead |
+| Implement Models | 31 Oct 2025 | Code Apriori, UCFA, ICFA, **and SVD** | All |
+| Report Draft | 7 Nov 2025 | KDD format; include "Goldilocks" analysis | Lead |
 | Presentation & Files | 21 Nov 2025 | 7 slides; doc code/repo | All |
 
 ## Setup Instructions
 1. Clone repo: `git clone <your-repo>`.
-2. Install: `pip install pandas numpy scikit-surprise mlxtend matplotlib seaborn` (use course env).
+2. Install: `pip install pandas numpy scikit-surprise mlxtend matplotlib seaborn datasets` (use course env).
 3. Run: `jupyter notebook cos781-A3-sub.ipynb`.
-4. Data: Place `amazon_books.csv` in `/data/`.
+4. Data: Ensure internet access to load HuggingFace dataset or place JSONL in `/data/`.
 
 ## Generative AI Statement
 No AI used for core analysis/code; only for planning (e.g., README structure). All results from manual replication.
 
 ## References
 - Paper: Wu et al. (2017). IEEE IEEM.
-- Dataset: McAuley et al. (Amazon Reviews).
-- Libs: Surprise docs, mlxtend Apriori guide.
+- Dataset: McAuley et al. (Amazon Reviews 2023).
+- Libs: Surprise SVD docs, mlxtend Apriori guide.
